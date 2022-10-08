@@ -6,9 +6,9 @@ echo "----";
 
 if [ -z "$AUX_API_HOST" ]
 then
-  UPSTREAM_HOST=agc-aux-server
+  UPSTREAM_HOST=agc-aux-server:8080
 else
-  UPSTREAM_HOST=$$AUX_API_HOST
+  UPSTREAM_HOST=$AUX_API_HOST
 fi
 echo "-- Configure API upstream to $UPSTREAM_HOST"
 (echo "upstream backendbase { server $UPSTREAM_HOST; }" && cat /etc/nginx/conf.d/full_proxy.conf.template) > front-templated.conf

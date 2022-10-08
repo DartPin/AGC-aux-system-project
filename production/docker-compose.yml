@@ -22,7 +22,7 @@ services:
   agc-aux-web:
     image: 'agc-aux-web'
     depends_on:
-      - server
+      - agc-aux-server
     container_name: 'agc-aux-web'
     environment:
       # Переменная используется при запуске nginx (смотри web/devops/run.sh)

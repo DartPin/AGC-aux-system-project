@@ -6,7 +6,7 @@ COPY package.json /app
 
 RUN npm install
 
-COPY ../../AGC-aux-system-ser  .
+COPY .  .
 
 EXPOSE 8000
 

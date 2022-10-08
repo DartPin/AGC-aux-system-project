@@ -17,7 +17,7 @@ RUN npm install
 
 FROM base AS build-frontend-all
 
-COPY ../../AGC-aux-system .
+COPY . .
 
 RUN npm run build
 

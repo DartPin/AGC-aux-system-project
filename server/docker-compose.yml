@@ -1,0 +1,37 @@
+version: "3"
+
+services:
+
+  # Используем собранный ранее образ сервера (смотри server/devops/build.sh)
+  # Доступ до сервера будет только из контейнера клиента. Прямой доступ из браузера запрещён
+  agc-aux-server:
+    image: 'agc-aux-server'
+    container_name: 'agc-aux-server'
+    # Не забываем про наши папки с данными
+    volumes:
+      - ./data:/app/data
+      - ./files:/app/files
+    # Настраиваем логирование. Ротирование 5 файлов по 50 мегабайт
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  # Используем собранный ранее образ web клиента (смотри web/devops/build.sh)
+  agc-aux-web:
+    image: 'agc-aux-web'
+    depends_on:
+      - server
+    container_name: 'agc-aux-web'
+    environment:
+      # Переменная используется при запуске nginx (смотри web/devops/run.sh)
+      AUX_API_HOST: 'agc-aux-server:8000'
+    ports:
+      - "8080:8080"
+    # Настраиваем логирование. Ротирование 5 файлов по 50 мегабайт
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"

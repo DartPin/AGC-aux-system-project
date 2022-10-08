@@ -9,8 +9,8 @@ services:
     container_name: 'agc-aux-server'
     # Не забываем про наши папки с данными
     volumes:
-      - ./data:/app/data
-      - ./files:/app/files
+      - ./app/data:/app/data
+      - ./app/files:/app/files
     # Настраиваем логирование. Ротирование 5 файлов по 50 мегабайт
     logging:
       driver: "json-file"
@@ -28,7 +28,7 @@ services:
       # Переменная используется при запуске nginx (смотри web/devops/run.sh)
       AUX_API_HOST: 'agc-aux-server:8000'
     ports:
-      - "8080:8080"
+      - "8080:80"
     # Настраиваем логирование. Ротирование 5 файлов по 50 мегабайт
     logging:
       driver: "json-file"

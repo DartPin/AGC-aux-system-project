@@ -22,9 +22,16 @@ cd ${HOME}
 out "Сохранение папки дистрибутива"
 rm -rf dist
 mkdir -p dist/images
+
 docker save agc-aux-server:latest > dist/images/agc-aux-server.tar.gz
-docker save agc-aux-web:latest > dist/images/agc-aux-client.tar.gz
+docker save agc-aux-web:latest > dist/images/agc-aux-web.tar.gz
 cp ${HOME}/production/install.sh dist
 cp ${HOME}/production/docker-compose.yml dist
 out "Сборка выполена успешна: Используйте содержимое папки dist на промышленном стенде"
+
+out "Копирование примеров с данными"
+mkdir -p dist/examples
+cp -rf ${HOME}/server/data dist/examples/
+cp -rf ${HOME}/server/files dist/examples/
+
 

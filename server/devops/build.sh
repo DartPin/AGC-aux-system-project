@@ -34,10 +34,6 @@ function build {
 
     out "Build in docker $DOCKER_JOB_IMAGE_TAG"
 
-    versionHash=`git rev-parse HEAD`
-    versionBuild=$CI_DEPLOY_TAG
-    buildDate=`date`
-
     echo "Tag pipeline job tag"
     docker build -t $DOCKER_JOB_IMAGE_TAG .
 

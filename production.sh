@@ -10,7 +10,7 @@ function out {
 
 # 1. Сборка Docker образов
 out "Сборка docker образа серверной части"
-сd ${HOME}/server
+cd ${HOME}/server
 ./devops/build.sh
 
 out "Сборка docker образа клиентской части"

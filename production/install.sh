@@ -8,6 +8,9 @@ function out {
   echo -e "${COLOR}[AGC]: $1${COLOR_OFF}"
 }
 
+out "Переходим в рабочую директорию ${HOME}"
+cd ${HOME}
+
 out "Загружаем последнию версию приложения"
 
 docker load < ${HOME}/images/agc-aux-server.tar.gz

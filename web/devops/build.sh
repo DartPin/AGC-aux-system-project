@@ -5,7 +5,9 @@
 # DOCKER_REPOSITORY - url докер репозитория. Пустой по умолчанию
 # CI_DEPLOY_TAG - номер версии сборки. Если не указан собёрется :latest
 
+# завершать скрипт при любой ошибке
 set -e
+
 
 DOCKER_IMAGE_NAME=agc-aux-web
 

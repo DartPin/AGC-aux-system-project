@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# завершать скрипт при любой ошибке
+set -e
+
 # Скрипт для сборки полноценного дистрибутива
 HOME=$(cd `dirname $0` && pwd)
 function out {
@@ -7,6 +10,9 @@ function out {
 
   echo -e "${COLOR}[AGC]: $1${COLOR_OFF}"
 }
+
+out "Обязательно убедитесь что скрипт по завершению напишет что всё прошло успешно!"
+
 
 # 1. Сборка Docker образов
 out "Сборка docker образа серверной части"
@@ -33,5 +39,7 @@ out "Копирование примеров с данными"
 mkdir -p dist/examples
 cp -rf ${HOME}/server/data dist/examples/
 cp -rf ${HOME}/server/files dist/examples/
+
+out "Поздравляем! Сборка AGC AUX System готова к установке!"
 
 

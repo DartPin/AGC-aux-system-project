@@ -1,5 +1,24 @@
 <template>
     <div>
+        <v-alert :value="alert" color="red" dark border="top" icon="mdi-alert" transition="scale-transition"
+            style="position: absolute; z-index: 1; margin: 50% 0 0 30%">
+            Не все поля заполнены. 
+            Обязательны к заполнению следующие поля: <br>
+             - номер смены <br>
+            - производство <br>
+            - линия <br>
+            - название оборудования <br>
+            - дата <br>
+            - Продолжительность работ <br>
+            - название узла <br>
+            - корневая причина <br>
+            <v-row>
+                <v-col>
+                    <v-btn @click="alert=false">OK</v-btn>
+                </v-col>
+            </v-row>
+
+        </v-alert>
         <v-container>
             <div><h1>Информация о проведенных аварийных работах</h1></div>
             <v-divider></v-divider>
@@ -51,7 +70,7 @@
                             <CalendarLine v-model="workItem.date"></CalendarLine>
                         </v-col>
                         <v-col cols="4">
-                            <v-text-field outlined label='Продолжительность "в часах"' v-model="workItem.time" dense></v-text-field>
+                            <v-text-field outlined label='Продолжительность в минутах' v-model="workItem.time" dense></v-text-field>
                         </v-col>
                         <v-col cols="4">
                             <v-text-field outlined label='Введите название узла' v-model="workItem.place" dense></v-text-field>
@@ -131,13 +150,13 @@
 <script>
 import CalendarLine from '@/components/CalendarLine.vue';
 import CalendarLinePeriod from '@/components/CalendarLinePeriod.vue';
-import axios from 'axios';
 import {httpServer} from "@/main";
 
 
     export default {
     data() {
         return {
+            alert: false,
             headers: [
                 { text: 'Производство', value: 'production', align: 'center'},
                 { text: 'Линия',align: 'center', value: 'line' },
@@ -197,25 +216,33 @@ import {httpServer} from "@/main";
         },
         pushNewTask() {
             this.workItem.timeSave = new Date();
+
+            this.workItem.timeSave = this.workItem.timeSave.toLocaleString()
             let that = this
-            httpServer.post("Maitanence/workList", this.workItem)
-            .then(function (response) {
-                that.workList = response.data;
-            })
-            this.workItem = {
-                productionShift: "",
-                production: "",
-                line: "",
-                equipment: "",
-                time: "",
-                place: "",
-                rootCause: "",
-                comment: "",
-                date: null,
-                timeSave: ""
-            };
-            this.date = null
-            this.showNewTab = false;
+
+            if ((this.workItem.productionShift === "") || (this.workItem.production === "") || (this.workItem.line === "") || (this.workItem.equipment === "") || (this.workItem.time === "") || (this.workItem.place === "") || (this.workItem.rootCause === "") || (this.workItem.date === null)){
+                this.alert = true
+            } else {
+                console.log("ВЫполняется запрос")
+                httpServer.post("Maitanence/workList", this.workItem)
+                .then(function (response) {
+                    that.workList = response.data;
+                })
+                this.workItem = {
+                    productionShift: "",
+                    production: "",
+                    line: "",
+                    equipment: "",
+                    time: "",
+                    place: "",
+                    rootCause: "",
+                    comment: "",
+                    date: null,
+                    timeSave: ""
+                };
+                this.date = null
+                this.showNewTab = false;
+            }
         },
         cancelTask() {
             this.workItem = {

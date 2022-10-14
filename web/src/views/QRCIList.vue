@@ -97,7 +97,6 @@
 </template>
 
 <script>
-    import axios from "axios"
     import {httpServer} from "@/main";
 
     export default{

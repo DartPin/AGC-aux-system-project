@@ -1,13 +1,16 @@
+const fs = require("fs");
+const bodyParser = require("body-parser");
+const jsonParser = bodyParser.json();
 
-const fs = require("fs")
-const bodyParser = require("body-parser")
-const jsonParser = bodyParser.json()
+// добавление USER LOGIN & PASS
 
-let arr = []
-fs.readFile("./data/qrciList.json", "utf8",function(error,data){
-                  if(error) throw error; // если возникла ошибка
-  
-                  arr = JSON.parse(data);  // выводим считанные данные
-              });
+let data = fs.readFileSync("./data/users.json", "utf8");
+let dataStr = JSON.parse(data);
 
-console.log(arr)
+dataStr.forEach((element) => {
+  element.auth = "";
+});
+
+console.log(dataStr);
+data = JSON.stringify(dataStr);
+fs.writeFileSync("./data/users.json", data, "utf8");

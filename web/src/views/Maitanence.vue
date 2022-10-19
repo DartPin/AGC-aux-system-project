@@ -38,7 +38,9 @@
                         <v-col cols="6">
                             <v-autocomplete
                                 outlined
-                                :items="dataPack.production"
+                                :items="equipmentList"
+                                item-text="department"
+                                item-value="id"
                                 label="Введите производство"
                                 v-model="workItem.production"
                                 dense
@@ -49,7 +51,9 @@
                         <v-col cols="6">
                             <v-autocomplete
                                 outlined
-                                :items="dataPack.line"
+                                :items="equipmentList[workItem.production].lines"
+                                item-text="line"
+                                item-value="id"
                                 label="Введите линию"
                                 v-model="workItem.line"
                                 dense
@@ -58,11 +62,25 @@
                         <v-col cols="6">
                             <v-autocomplete
                                 outlined
-                                :items="dataPack.equipment"
-                                label="Введите название оборудования"
-                                v-model="workItem.equipment"
+                                :items="equipmentList[workItem.production].lines[workItem.line].prodAreas"
+                                item-text="prodArea"
+                                item-value="id"
+                                label="Укажите название участка"
+                                v-model="workItem.prodArea"
                                 dense
                             ></v-autocomplete>
+                        </v-col>
+                    </v-row>
+                    <v-row>
+                        <v-col cols="6">
+                            <v-autocomplete outlined :items="equipmentList[workItem.production].lines[workItem.line].prodAreas[workItem.prodArea].equipments" item-text="equipment"
+                                item-value="id"  label="Введите название оборудования"  v-model="workItem.equipment" dense>
+                            </v-autocomplete>
+                        </v-col>
+                        <v-col cols="6">
+                            <v-autocomplete outlined :items="equipmentList[workItem.production].lines[workItem.line].prodAreas[workItem.prodArea].equipments[workItem.equipment].prodUnits" item-text="prodUnit"
+                                label="Укажите название узла" v-model="workItem.prodUnit"
+                                 dense></v-autocomplete>
                         </v-col>
                     </v-row>
                     <v-row>
@@ -70,17 +88,17 @@
                             <CalendarLine v-model="workItem.date"></CalendarLine>
                         </v-col>
                         <v-col cols="4">
-                            <v-text-field outlined label='Продолжительность в минутах' v-model="workItem.time" dense></v-text-field>
+                            <v-text-field outlined label='Продолжительность в часах' v-model="workItem.time" dense></v-text-field>
                         </v-col>
                         <v-col cols="4">
-                            <v-text-field outlined label='Введите название узла' v-model="workItem.place" dense></v-text-field>
+                            <v-text-field outlined label='ФИО ответственного' v-model="workItem.worker" dense></v-text-field>
                         </v-col>
                     </v-row>
                     <v-row>
                         <v-textarea
                         outlined
                         name="input-7-4"
-                        label="Коренная причина"
+                        label="Корневая причина"
                         value=""
                         v-model="workItem.rootCause"
                         ></v-textarea>
@@ -104,6 +122,7 @@
                 </v-container>
             </v-container> 
             <v-container>
+
 
             <v-container style="padding: 10px; margin: 0 0 10px 0;">
                 <v-row>
@@ -140,7 +159,14 @@
                         :items="worksList"
                         :items-per-page="20"
                         class="elevation-1"
-                    ></v-data-table>
+                    >
+                        <template v-slot:item.action="{ item }">
+                        
+                            <v-icon small class="mr-2" @click="editItem(item)">
+                                mdi-pencil
+                            </v-icon>
+                        </template>
+                    </v-data-table>
                 </template>
             </v-container>
         </v-container>
@@ -156,18 +182,21 @@ import {httpServer} from "@/main";
     export default {
     data() {
         return {
+            equipments: [],
             alert: false,
             headers: [
                 { text: 'Производство', value: 'production', align: 'center'},
                 { text: 'Линия',align: 'center', value: 'line' },
-                { text: 'Зона',align: 'center', value: 'equipment' },
+                { text: 'Участок',align: 'center', value: 'prodArea' },
+                { text: 'Оборудование', align: 'center', value: 'equipment' },
+                { text: 'Узел', align: 'center', value: 'prodUnit' },
                 { text: 'Смена',align: 'center', value: 'productionShift' },
                 { text: 'Дата',align: 'center', value: 'date' },
                 { text: 'Время заполнения',align: 'center', value: 'timeSave' },
                 { text: 'Продолжительность',align: 'center', value: 'time' },
-                { text: 'Узел',align: 'center', value: 'place' },
                 { text: 'Коренная причина',align: 'center', value: 'rootCause' },
-                { text: 'Комментарий',align: 'center', value: 'comment' }
+                { text: 'Комментарий',align: 'center', value: 'comment' },
+                { text: '', align: 'center', value: 'action' }
             ],
             showCalendar: false,
             showNewTab: false,
@@ -180,15 +209,19 @@ import {httpServer} from "@/main";
             workList: [],
             workItem: {
                 productionShift: "",
-                production: "",
-                line: "",
-                equipment: "",
+                production: 0,
+                line: 0,
+                prodArea: 0,
+                equipment: 0,
+                prodUnit: 0,
                 time: "",
-                place: "",
                 rootCause: "",
                 comment: "",
                 date: null,
-                timeSave: ""
+                timeSave: "",
+                worker: "",
+                ind: [],
+                status:"new"
             },
             period:['2022-09-10', '2022-09-20']
         };
@@ -198,6 +231,10 @@ import {httpServer} from "@/main";
         .then(response => (
             this.workList = response.data
         ))
+        httpServer.get('Maitanence/equipment')
+            .then(response => (
+                this.equipments = response.data
+            ))
     },
     methods: {
         sendPeriod(){
@@ -220,25 +257,39 @@ import {httpServer} from "@/main";
             this.workItem.timeSave = this.workItem.timeSave.toLocaleString()
             let that = this
 
-            if ((this.workItem.productionShift === "") || (this.workItem.production === "") || (this.workItem.line === "") || (this.workItem.equipment === "") || (this.workItem.time === "") || (this.workItem.place === "") || (this.workItem.rootCause === "") || (this.workItem.date === null)){
+            if ((this.workItem.productionShift === "") || (this.workItem.worker === "") || (this.workItem.production === "") || (this.workItem.line === "") || (this.workItem.equipment === "") || (this.workItem.time === "") || (this.workItem.prodUnit === "") || (this.workItem.rootCause === "") || (this.workItem.date === null)){
                 this.alert = true
             } else {
-                console.log("ВЫполняется запрос")
+                this.workItem.ind.push(this.workItem.production)
+                this.workItem.ind.push(this.workItem.line)
+                this.workItem.ind.push(this.workItem.prodArea)
+                this.workItem.ind.push(this.workItem.equipment)
+                this.workItem.prodUnit = this.workItem.prodUnit
+                this.workItem.equipment = this.equipmentList[this.workItem.production].lines[this.workItem.line].prodAreas[this.workItem.prodArea].equipments[this.workItem.equipment].equipment
+                this.workItem.prodArea = this.equipmentList[this.workItem.production].lines[this.workItem.line].prodAreas[this.workItem.prodArea].prodArea
+                this.workItem.line = this.equipmentList[this.workItem.production].lines[this.workItem.line].line
+                this.workItem.production = this.equipmentList[this.workItem.production].department
+
+
                 httpServer.post("Maitanence/workList", this.workItem)
                 .then(function (response) {
                     that.workList = response.data;
                 })
                 this.workItem = {
                     productionShift: "",
-                    production: "",
-                    line: "",
-                    equipment: "",
+                    production: 0,
+                    line: 0,
+                    prodArea: 0,
+                    equipment: 0,
+                    prodUnit: 0,
                     time: "",
-                    place: "",
                     rootCause: "",
                     comment: "",
                     date: null,
-                    timeSave: ""
+                    timeSave: "",
+                    worker: "", 
+                    ind: [],
+                    status: "new"
                 };
                 this.date = null
                 this.showNewTab = false;
@@ -247,15 +298,30 @@ import {httpServer} from "@/main";
         cancelTask() {
             this.workItem = {
                 productionShift: "",
-                production: "",
-                line: "",
-                equipment: "",
+                production: 0,
+                line: 0,
+                prodArea: 0,
+                equipment: 0,
+                prodUnit: 0,
                 time: "",
-                place: "",
                 rootCause: "",
-                comment: ""
+                comment: "",
+                date: null,
+                timeSave: "",
+                worker: "",
+                ind: [],
+                status: "new"
             };
             this.showNewTab = false;
+        },
+        editItem(item){
+            this.workItem = item
+            this.workItem.equipment = item.ind[3]
+            this.workItem.prodArea = item.ind[2]
+            this.workItem.line = item.ind[1]
+            this.workItem.production = item.ind[0]
+            this.workItem.status = "edit"
+            this.showNewTab = true
         }
     },
     computed:{
@@ -269,6 +335,9 @@ import {httpServer} from "@/main";
                 })
             }
             return arr    
+        },
+        equipmentList(){
+            return this.equipments
         }
     },
     components: { CalendarLine, CalendarLinePeriod}

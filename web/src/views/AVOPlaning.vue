@@ -58,10 +58,10 @@
                 </v-row>
                 <v-row>
                     <v-col cols="3">
-                        <v-text-field outlined label='Количество статуса "К"' v-model="formItem.quantityK"></v-text-field>
+                        <v-text-field outlined label='Количество статуса К' v-model="formItem.quantityK"></v-text-field>
                     </v-col>
                     <v-col cols="3">
-                        <v-text-field outlined label='Количество статуса "G"' v-model="formItem.quantityG"></v-text-field>
+                        <v-text-field outlined label='Количество статуса G' v-model="formItem.quantityG"></v-text-field>
                     </v-col>
                     <v-col cols="3">
                         <v-text-field outlined label='Время наработки' v-model="formItem.productionTime"></v-text-field>

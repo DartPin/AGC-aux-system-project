@@ -1,6 +1,6 @@
 <template>
     <div class="auth">
-    <v-container align-content-center style="margin: 100px 0 0 0">
+    <v-container align-content-center style="margin: 100px 0 200px 0">
         <v-card max-width="400" class="mx-auto">  
             <v-row >
                 <v-col><h1><b>LOGIN</b></h1></v-col>
@@ -70,9 +70,10 @@ import { httpServer } from "@/main";
 </script>
 
 <style scoped>
-     .auth{
-        background: white;
+.auth{
         position: absolute;
         width: 100%;
+        background: url('../assets/agc-back.jpg') no-repeat center center fixed;
+        background-size: 100% 100%;
     }
 </style>

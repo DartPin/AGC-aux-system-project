@@ -769,6 +769,16 @@ app.post("/api/AVOPlaningDate", jsonParser, function (request, response) {
   }
 });
 
+//ПЕРЕЧЕНЬ ОБОРУДОВАНИЯ
+app.get("/api/Maitanence/equipment", (request, response) => {
+  fs.readFile("./data/equipment.json", "utf8", function (error, data) {
+    if (error) throw error; // если возникла ошибка
+    let arr = JSON.parse(data);
+    response.send(arr);
+  });
+});
+
+//ПЕРЕЧЕНЬ РАБОТ ДЕЖУРНОЙ СЛУЖБЫ
 app.get("/api/Maitanence/workList", (request, response) => {
   fs.readFile("./data/maitanenceWorkList.json", "utf8", function (error, data) {
     if (error) throw error; // если возникла ошибка
@@ -787,23 +797,59 @@ app.post("/api/Maitanence/workList", jsonParser, function (request, response) {
   let dateReq = new Date(request.body.date);
   dateReq.setHours(3, 0, 0, 0);
   let checked = true;
+  let id = 1;
+
+  dataStr.forEach((elem) => {
+    elem.work.forEach((item) => {
+      if (id <= item.id) {
+        id = item.id + 1;
+      }
+    });
+  });
+
   dataStr.forEach((elem) => {
     let newDate = new Date(elem.date);
     let count = newDate - dateReq;
-    if (count === 0) {
-      checked = false;
-      let item = {
-        productionShift: request.body.productionShift,
-        production: request.body.production,
-        line: request.body.line,
-        equipment: request.body.equipment,
-        time: request.body.time,
-        place: request.body.place,
-        rootCause: request.body.rootCause,
-        comment: request.body.comment,
-        timeSave: request.body.timeSave,
-      };
-      elem.work.push(item);
+    if (obj.status === "edit") {
+      elem.work.forEach((item) => {
+        if (obj.id === item.id) {
+          item.id = obj.id;
+          item.production = obj.production;
+          item.line = obj.line;
+          item.prodArea = obj.prodArea;
+          item.prodUnit = obj.prodUnit;
+          item.equipment = obj.equipment;
+          item.time = obj.time;
+          item.rootCause = obj.rootCause;
+          item.comment = obj.comment;
+          item.timeSave = obj.timeSave;
+          item.worker = obj.worker;
+          item.ind = obj.ind;
+          item.status = obj.status;
+          checked = false;
+        }
+      });
+    } else {
+      if (count === 0) {
+        checked = false;
+        let item = {
+          id: id,
+          productionShift: request.body.productionShift,
+          production: request.body.production,
+          line: request.body.line,
+          prodArea: request.body.prodArea,
+          prodUnit: request.body.prodUnit,
+          equipment: request.body.equipment,
+          time: request.body.time,
+          rootCause: request.body.rootCause,
+          comment: request.body.comment,
+          timeSave: request.body.timeSave,
+          worker: request.body.worker,
+          ind: request.body.ind,
+          status: request.body.status,
+        };
+        elem.work.push(item);
+      }
     }
   });
   if (checked === true) {
@@ -811,15 +857,20 @@ app.post("/api/Maitanence/workList", jsonParser, function (request, response) {
       date: request.body.date,
       work: [
         {
+          id: id,
           productionShift: request.body.productionShift,
           production: request.body.production,
           line: request.body.line,
+          prodArea: request.body.prodArea,
+          prodUnit: request.body.prodUnit,
           equipment: request.body.equipment,
           time: request.body.time,
-          place: request.body.place,
           rootCause: request.body.rootCause,
           comment: request.body.comment,
           timeSave: request.body.timeSave,
+          worker: request.body.worker,
+          ind: request.body.ind,
+          status: request.body.status,
         },
       ],
     });

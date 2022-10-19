@@ -6,6 +6,7 @@ services:
   # Доступ до сервера будет только из контейнера клиента. Прямой доступ из браузера запрещён
   agc-aux-server:
     image: 'agc-aux-server'
+    restart: always
     container_name: 'agc-aux-server'
     # Не забываем про наши папки с данными
     volumes:
@@ -21,6 +22,7 @@ services:
   # Используем собранный ранее образ web клиента (смотри web/devops/build.sh)
   agc-aux-web:
     image: 'agc-aux-web'
+    restart: unless-stopped
     depends_on:
       - agc-aux-server
     container_name: 'agc-aux-web'

@@ -284,7 +284,6 @@
 
 <script>
 import CalendarLine from '@/components/CalendarLine.vue';
-import axios from 'axios';
 import {httpServer} from "@/main";
 
     export default{

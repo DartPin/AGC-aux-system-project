@@ -7,6 +7,7 @@ import QRCIList from "@/views/QRCIList.vue";
 import QRCIEdit from "@/views/QRCIEdit.vue";
 import DevReportModel from "@/views/DevReportModel.vue";
 import DevList from "@/views/DevList.vue";
+import DevPlanTest from "@/views/DevPlanTest.vue";
 import Login from "@/views/Login";
 
 Vue.use(VueRouter);
@@ -46,6 +47,16 @@ const routes = [
     path: "/Development/DevReportModel/",
     name: "DevReportModel",
     component: DevReportModel,
+  },
+  {
+    path: "/Development/DevReportModel/:id",
+    name: "DevReportModelId",
+    component: DevReportModel,
+  },
+  {
+    path: "/Development/DevPlanTest/:modelId/:rowId",
+    name: "DevPlanTest",
+    component: DevPlanTest,
   },
   {
     path: "/Development/DevList",

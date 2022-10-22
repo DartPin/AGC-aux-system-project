@@ -953,6 +953,14 @@ app.post(
   }
 );
 
+app.get("/api/Develop/devList", (request, response) => {
+  fs.readFile("./data/developModels.json", "utf8", function (error, data) {
+    if (error) throw error; // если возникла ошибка
+    let arr = JSON.parse(data);
+    response.send(arr);
+  });
+});
+
 app.post(
   "/api/Development/DevReportModel",
   jsonParser,
@@ -962,7 +970,70 @@ app.post(
     let obj = request.body;
     let data = fs.readFileSync("./data/developModels.json", "utf8");
     let dataStr = JSON.parse(data);
+    let id = 0;
+    dataStr.forEach((element) => {
+      if (element.id >= id) {
+        id = element.id + 1;
+      }
+    });
+    obj.id = id;
     dataStr.push(obj);
+    data = JSON.stringify(dataStr);
+    fs.writeFileSync("./data/developModels.json", data, "utf8");
+  }
+);
+
+// ОТПРАВКА МОДЕЛИ РАЗВИТИЯ по номеру
+app.get("/api/Development/DevReportModel/:id", (request, responce) => {
+  fs.readFile("./data/developModels.json", "utf8", function (error, data) {
+    if (error) throw error; // если возникла ошибка
+    let arr = JSON.parse(data);
+    console.log("получено");
+    arr.forEach((elem) => {
+      if (Number(request.params["id"]) === elem.id) {
+        responce.send(elem);
+        console.log("отправлено");
+      }
+    });
+  });
+});
+
+// ОТПРАВКА МОДЕЛИ РАЗВИТИЯ по номеру модели и номеру строки
+app.get("/api/Development/DevPlanTest/:modelId/:rowId", (request, responce) => {
+  fs.readFile("./data/developModels.json", "utf8", function (error, data) {
+    if (error) throw error; // если возникла ошибка
+    let arr = JSON.parse(data);
+    console.log("получено");
+    arr.forEach((elem) => {
+      if (Number(request.params["modelId"]) === elem.id) {
+        let obj = elem.rowTests[request.params["rowId"]];
+        obj.model = elem.model;
+
+        responce.send(obj);
+        console.log("отправлено");
+      }
+    });
+  });
+});
+
+// СОХРАНЕНИЕ МОДЕЛИ РАЗВИТИЯ ПОСЛЕ РЕДАКТИРОВАНИЯ
+
+app.post(
+  "/api/Development/DevReportModel/:id",
+  jsonParser,
+  function (request, response) {
+    if (!request.body) return response.sendStatus(400);
+
+    let obj = request.body;
+    let data = fs.readFileSync("./data/developModels.json", "utf8");
+    let dataStr = JSON.parse(data);
+    let ind = 0;
+    dataStr.forEach((element) => {
+      if (element.id === obj.id) {
+        dataStr.splice(ind, 1, obj);
+      }
+      ind++;
+    });
     data = JSON.stringify(dataStr);
     fs.writeFileSync("./data/developModels.json", data, "utf8");
   }

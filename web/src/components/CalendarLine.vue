@@ -22,6 +22,7 @@
       <v-date-picker
         v-model="date"
         locale="RU-ru"
+        :first-day-of-week="1"
       ></v-date-picker>
     </v-menu>
   </div>

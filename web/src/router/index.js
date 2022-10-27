@@ -8,6 +8,8 @@ import QRCIEdit from "@/views/QRCIEdit.vue";
 import DevReportModel from "@/views/DevReportModel.vue";
 import DevList from "@/views/DevList.vue";
 import DevPlanTest from "@/views/DevPlanTest.vue";
+import PhotoLabNewBlank from "@/views/PhotoLabNewBlank.vue";
+import NewProductionShiftTask from "@/views/NewProductionShiftTask.vue";
 import Login from "@/views/Login";
 
 Vue.use(VueRouter);
@@ -62,6 +64,16 @@ const routes = [
     path: "/Development/DevList",
     name: "DevList",
     component: DevList,
+  },
+  {
+    path: "/Production/PhotoLab/NewBlank",
+    name: "PhotoLabNewBlank",
+    component: PhotoLabNewBlank,
+  },
+  {
+    path: "/Production/PhotoLab/NewProductionShiftTask",
+    name: "NewProductionShiftTask",
+    component: NewProductionShiftTask,
   },
   {
     path: "/*",

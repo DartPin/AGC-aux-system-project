@@ -44,4 +44,13 @@ export default [
       },
     ],
   },
+  {
+    nameBlock: "Производство",
+    items: [
+      {
+        nameItem: "Заявка на изготовление экранов",
+        path: "/Production/PhotoLab/NewBlank",
+      },
+    ],
+  },
 ];

@@ -72,6 +72,51 @@ app.get("/api/Users", (request, response) => {
   });
 });
 
+// ПОИСК МОДЕЛИ ПО АРТИКЛЮ
+
+app.post("/api/FindModels", jsonParser, function (request, response) {
+  if (!request.body) return response.sendStatus(400);
+
+  let obj = request.body;
+  let data = fs.readFileSync("./dataModels.json", "utf8");
+  let dataStr = JSON.parse(data);
+  let model = "";
+  dataStr.forEach((element) => {
+    element.articles.forEach((item) => {
+      if (item.art === Number(obj.article)) {
+        model = element;
+      }
+    });
+  });
+  response.send(model);
+  console.log(model);
+});
+
+// СОХРАНЕНИЕ ИЗМЕНЕНИЙ ИНФОРМАЦИИ ПО МОДЕЛЯМ
+app.post(
+  "/api/Production/SaveModelInfo",
+  jsonParser,
+  function (request, response) {
+    if (!request.body) return response.sendStatus(400);
+
+    let obj = request.body;
+    let data = fs.readFileSync("./dataModels.json", "utf8");
+    let dataStr = JSON.parse(data);
+    console.log(obj);
+    dataStr.forEach((element) => {
+      element.articles.forEach((item) => {
+        if (item.art === Number(obj.article)) {
+          item.frame = obj.frame;
+          item.surfaces = obj.surfaces;
+        }
+      });
+    });
+
+    data = JSON.stringify(dataStr);
+    fs.writeFileSync("./dataModels1.json", data, "utf8");
+  }
+);
+
 // ОТПРАВКА СПИСКА QRCI
 
 app.get("/api/Quality/qrciList", (request, response) => {
@@ -1036,6 +1081,148 @@ app.post(
     });
     data = JSON.stringify(dataStr);
     fs.writeFileSync("./data/developModels.json", data, "utf8");
+  }
+);
+
+//СОХРАНЕНИЕ ЗАЯВКИ НА ЭКРАН
+app.post("/api/newScreen", jsonParser, function (request, response) {
+  if (!request.body) return response.sendStatus(400);
+
+  let obj = request.body;
+  console.log(obj);
+  let data = fs.readFileSync("./data/screenTaskList.json", "utf8");
+  let dataStr = JSON.parse(data);
+  let checkingDate = false;
+
+  dataStr.forEach((element) => {
+    if (obj.date === element.date) {
+      checkingDate = true;
+      let checkingLine = false;
+      console.log("Совпала дата");
+      element.list.forEach((item) => {
+        if (item != null) {
+          if (item.prodLine.id === obj.choosenLine.id) {
+            console.log("Совпала линия");
+            checkingLine = true;
+            let screen = {
+              id: item.list.length,
+              model: obj.model,
+              article: obj.article,
+              comment: obj.comment,
+              screenJob: obj.screenJob,
+              number: obj.number,
+              net: obj.net,
+              surface: obj.surface,
+              frame: obj.frame,
+              status: { text: "планирование", ind: 0, line: "" },
+            };
+            item.list.push(screen);
+          }
+        }
+      });
+      if (!checkingLine) {
+        console.log("Новая линия");
+        element.list[obj.choosenLine.id] = {
+          prodLine: obj.choosenLine,
+          list: [
+            {
+              id: 0,
+              model: obj.model,
+              article: obj.article,
+              comment: obj.comment,
+              screenJob: obj.screenJob,
+              number: obj.number,
+              net: obj.net,
+              surface: obj.surface,
+              frame: obj.frame,
+              status: { text: "планирование", ind: 0, line: "" },
+            },
+          ],
+        };
+      }
+    }
+  });
+  if (checkingDate === false) {
+    console.log("Новая дата");
+    dataStr.push({
+      id: dataStr.length,
+      date: obj.date,
+      list: [],
+    });
+    dataStr[dataStr.length - 1].list[obj.choosenLine.id] = {
+      prodLine: obj.choosenLine,
+      list: [
+        {
+          id: obj.id,
+          model: obj.model,
+          article: obj.article,
+          screenJob: obj.screenJob,
+          comment: obj.comment,
+          number: obj.number,
+          net: obj.net,
+          surface: obj.surface,
+          frame: obj.frame,
+          status: { text: "планирование", ind: 0, line: "" },
+        },
+      ],
+    };
+  }
+  response.send(dataStr[obj.screensListId]);
+  data = JSON.stringify(dataStr);
+  fs.writeFileSync("./data/screenTaskList.json", data, "utf8");
+});
+
+// ПОЛУЧЕНИЕ СПИСКА ЭКРАНОВ ПО ДАТЕ
+app.post(
+  "/api/Production/DateListScreen",
+  jsonParser,
+  function (request, response) {
+    if (!request.body) return response.sendStatus(400);
+
+    let obj = request.body;
+    let data = fs.readFileSync("./data/screenTaskList.json", "utf8");
+    let dataStr = JSON.parse(data);
+    let dateWeb = new Date(obj.date);
+    dateWeb = dateWeb.setHours(3, 0, 0, 0);
+    let sendData = "";
+    dataStr.forEach((elem) => {
+      let x = new Date(elem.date) - dateWeb;
+      console.log(x);
+      if (x === 0) {
+        sendData = elem;
+        console.log(elem);
+      }
+    });
+    response.send(sendData);
+  }
+);
+
+//УДАЛЕНИЕ ЭКРАНА ИЗ СПИСКА
+
+app.post(
+  "/api/Production/DeleteScreen",
+  jsonParser,
+  function (request, response) {
+    if (!request.body) return response.sendStatus(400);
+
+    let obj = request.body;
+    let data = fs.readFileSync("./data/screenTaskList.json", "utf8");
+    let dataStr = JSON.parse(data);
+    console.log(obj);
+    dataStr.forEach((element) => {
+      if (element.id === obj.dateId) {
+        console.log(element);
+        element.list[obj.prodLineId].list.forEach((item, index) => {
+          if (item.id === obj.rowId) {
+            element.list[obj.prodLineId].list.splice(index, 1);
+          }
+        });
+      }
+    });
+
+    response.send(dataStr[obj.dateId]);
+    data = JSON.stringify(dataStr);
+    fs.writeFileSync("./data/screenTaskList.json", data, "utf8");
   }
 );
 
